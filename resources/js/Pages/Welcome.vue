@@ -2,10 +2,7 @@
 import { Head, Link } from '@inertiajs/inertia-vue3';
 
 defineProps({
-    canLogin: Boolean,
-    canRegister: Boolean,
-    laravelVersion: String,
-    phpVersion: String,
+  covidrecords:Object
 });
 </script>
 
@@ -69,7 +66,7 @@ defineProps({
                             </thead>
                             <tbody>
                                  <tr
-                                  v-for="cases in covidrecords"
+                                  v-for="cases in covidForm.querySet"
                                   :key="cases.id"
                                   class="all_records"
                                   >
@@ -100,6 +97,13 @@ defineProps({
 
                             </tbody>
                           </table>
+                          <div
+                          class="container" style="display:flex;justify-content: center;align-items:center;margin-top:20px;margin-bottom:30px;"
+                          >
+                          <div class="pagination_btns align-items-center">
+
+                          </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -275,11 +279,70 @@ import { Inertia } from "@inertiajs/inertia";
 export default {
   props: ["covidrecords"],
   mounted(){
-    setTimeout(()=>{
+     const getPageData = (querySet, page, rows)=>{
+
+      var trimStart = (page - 1) * rows;
+      var trimEnd  = trimStart + rows;
+
+      var trimedData = this.covidrecords.slice(trimStart, trimEnd);
+      var pages = Math.ceil(querySet.length /rows);
+
+      return {
+       querySet: trimedData,
+       pages: pages
+      }
+     }
+ const paginationBtns =(pages)=>{
+     var wrapper = document.querySelector('.pagination_btns');
+     wrapper.innerHTML = '';
+     var maxLeft = (this.covidForm.page - Math.floor(this.covidForm.window / 2))
+     var maxRight = (this.covidForm.page + Math.floor(this.covidForm.window / 2))
+     if(maxLeft < 2){
+      maxLeft = 1;
+      maxRight = (this.covidForm.window - 1);
+
+     }
+     if(maxRight > pages){
+      maxLeft = pages - (this.covidForm.window);
+
+      maxRight = pages;
+
+      if(maxLeft < 1){
+        maxLeft = 1;
+      }
+     }
 
 
-    },5000);
+     for(var page=maxLeft; page <= maxRight; page++){
 
+     wrapper.innerHTML +=  `<button data-value=${page} class='btns-pagination btn btn-success'>${page}</button> `;
+     }
+     if(this.covidForm.page != 1){
+      wrapper.innerHTML = `<button data-value=${1} class='btns-pagination btn btn-warning'> First</button>` + wrapper.innerHTML;
+     }
+     if(this.covidForm.page != pages){
+      wrapper.innerHTML += `<button data-value=${pages} class='btns-pagination btn btn-success'> Last</button>`;
+     }
+     }
+setInterval(()=>{
+      let data = getPageData(this.covidrecords, this.covidForm.page, this.covidForm.rows);
+       paginationBtns(data.pages);
+
+  const btns = document.querySelectorAll('.btns-pagination');
+       btns.forEach((btn)=>{
+        btn.onclick = ()=>{
+
+// alert(btn.dataset.value);
+this.covidForm.page = btn.dataset.value;
+this.covidForm.querySet = data.querySet;
+ let innerData = getPageData(this.covidrecords, this.covidForm.page, this.covidForm.rows);
+paginationBtns(innerData.pages);
+
+
+        }
+       });
+
+},2000);
 },
   data() {
     return {
@@ -297,6 +360,10 @@ export default {
         total_recovered: null,
         id: 0,
         processing: true,
+         querySet: this.covidrecords,
+         page: 1,
+         rows: 10,
+         window: 10,
       }),
     };
   },
