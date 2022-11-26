@@ -32,6 +32,7 @@ defineProps({
                       <div class="rs ms-auto mt_r4">
                         <div class="nav custom2-tabs btn-group" role="tablist">
                           <button
+                          id="open_modal"
                             class="main-btn btn-hover h_40 w-100"
                             data-bs-toggle="modal"
                             data-bs-target="#createNewRecord"
@@ -62,6 +63,7 @@ defineProps({
                                 <th scope="col">Total Deaths</th>
                                 <th scope="col">New Recovered</th>
                                 <th scope="col">Total Recovered</th>
+                                <th scope="col">Edit</th>
 
                             </thead>
                             <tbody>
@@ -85,13 +87,10 @@ defineProps({
                                     data-bs-toggle="modal"
                                     data-bs-target="#createNewUserModal"
 
-                                    ><i class="fa-solid fa-pencil"></i
-                                  ></span>
-                                  <span
-                                    class="action-btn"
-
-                                    ><i class="fa-solid fa-trash-can"></i
-                                  ></span>
+                                    ><i class="fa-solid fa-pencil"
+                                    @click="changeForm(cases.id)"></i
+                                  >
+                                  </span>
                                 </td>
                               </tr>
 
@@ -121,7 +120,7 @@ defineProps({
       <div class="modal-dialog">
         <form
           class="modal-content"
-          @submit.prevent="!isEditUser ? submitData() : submitEditData()"
+          @submit.prevent="!isEditData ? submitData() : submitEditData()"
         >
           <div class="modal-header">
             <h5 class="modal-title" id="createLabel">Create New Record</h5>
@@ -139,6 +138,7 @@ defineProps({
               <div class="form-group mt-30">
                 <label class="form-label">Country Name*</label>
                 <input
+                :disabled="isEditData"
                   class="form-control h_40"
                   type="text"
                   placeholder="Name"
@@ -151,6 +151,7 @@ defineProps({
               <div class="form-group mt-30">
                 <label class="form-label">Slug Name*</label>
                 <input
+                :disabled="isEditData"
                   class="form-control h_40"
                   type="text"
                   placeholder="Slug"
@@ -346,7 +347,7 @@ paginationBtns(innerData.pages);
 },
   data() {
     return {
-      isEditUser: false,
+      isEditData: false,
       user_query: "",
       covidForm: useForm({
         name: null,
@@ -368,6 +369,22 @@ paginationBtns(innerData.pages);
     };
   },
   methods: {
+    changeForm(id){
+         this.isEditData=true;
+         this.covidForm.id = id;
+         document.getElementById('open_modal').click();
+           let data = this.covidrecords;
+      let resolved_data =   data.find(record => record.id === this.covidForm.id);
+         this.covidForm.name  = resolved_data.name;
+        this.covidForm.slug = resolved_data.slug;
+        this.covidForm.country_code = resolved_data.country_code;
+        this.covidForm.new_confirmed = resolved_data.new_confirmed;
+        this.covidForm.total_confirmed = resolved_data.total_confirmed;
+        this.covidForm.new_deaths = resolved_data.new_deaths;
+        this.covidForm.total_deaths = resolved_data.total_deaths;
+        this.covidForm.new_recovered = resolved_data.new_recovered;
+        this.covidForm.total_recovered = resolved_data.total_recovered;
+    },
     liveSearch(e) {
 
       // Locate the card elements
@@ -396,6 +413,16 @@ paginationBtns(innerData.pages);
 
       this.covidForm.post(`/record/add`, {
         onSuccess: () => {
+          document.getElementById("closeModal").click();
+        },
+      });
+    },
+    submitEditData() {
+      this.covidForm.post(`/record/update/${this.covidForm.id}`, {
+        onSuccess: (res) => {
+            const data_received = res.props.flash.message;
+          this.covidForm.querySet = res.props.flash.message;
+        //   location.reload();
           document.getElementById("closeModal").click();
         },
       });

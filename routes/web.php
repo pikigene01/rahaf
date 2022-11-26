@@ -26,3 +26,4 @@ use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/record/add', [HomeController::class, 'save_record'])->name('save_record');
+Route::post('/record/update/{id}', [HomeController::class, 'update'])->name('update');
