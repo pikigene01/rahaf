@@ -11,7 +11,7 @@ use App\Models\CountryCases;
 class HomeController extends Controller
 {
     public function index(){
-        $country_cases = CountryCases::all();
+        $country_cases = CountryCases::paginate(10);
         return Inertia::render('Welcome', [
             "covidrecords" => $country_cases,
         ]);
