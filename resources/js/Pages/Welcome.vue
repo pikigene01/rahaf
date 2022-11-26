@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/inertia-vue3';
+import { Bootstrap4Pagination } from 'laravel-vue-pagination';
 
 defineProps({
   covidrecords:Object
@@ -68,7 +69,7 @@ defineProps({
                             </thead>
                             <tbody>
                                  <tr
-                                  v-for="cases in covidForm.querySet"
+                                  v-for="cases in !isEditData?covidrecords:covidForm.querySet"
                                   :key="cases.id"
                                   class="all_records"
                                   >
@@ -96,6 +97,10 @@ defineProps({
 
                             </tbody>
                           </table>
+  <Bootstrap4Pagination
+        :data="covidrecords"
+        @pagination-change-page="getResults"
+    />
                           <div
                           class="container" style="display:flex;justify-content: center;align-items:center;margin-top:20px;margin-bottom:30px;"
                           >
@@ -276,9 +281,13 @@ defineProps({
  <script>
 import { useForm } from "@inertiajs/inertia-vue3";
 import { Inertia } from "@inertiajs/inertia";
+import { Bootstrap4Pagination } from 'laravel-vue-pagination';
+
 
 export default {
+    components: ["Bootstrap4Pagination"],
   props: ["covidrecords"],
+
   mounted(){
      const getPageData = (querySet, page, rows)=>{
 
@@ -369,6 +378,9 @@ paginationBtns(innerData.pages);
     };
   },
   methods: {
+    getResults(){
+ alert('paginate data');
+    },
     changeForm(id){
          this.isEditData=true;
          this.covidForm.id = id;

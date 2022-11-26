@@ -21,6 +21,7 @@
         "vue": "^3.2.31"
     },
     "dependencies": {
+        "laravel-vue-pagination": "^4.0.0",
         "vue-braintree": "^2.1.0",
         "vue-carousel": "^0.18.0",
         "vue-tawk": "^1.0.1"
